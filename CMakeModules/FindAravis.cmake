@@ -14,18 +14,18 @@ HINTS
   /usr/local/include
   /usr/include
 PATH_SUFFIXES
-  aravis-0.4
   aravis-0.6
+  aravis-0.4
 )
 
 FIND_LIBRARY(Aravis_LIBRARIES
 NAMES
-  libaravis-0.4
-  libaravis-0.6
   aravis
-  aravis-0.4
-  aravis-0.6
+  libaravis-0.6
+  libaravis-0.4
   libaravis
+  aravis-0.6
+  aravis-0.4
 
 HINTS
   "$ENV{aravis_LIBRARY}"
