@@ -1,0 +1,12 @@
+<launch>
+  <node pkg="nodelet" type="nodelet" name="standalone_nodelet"  args="manager" output="screen"/>
+  
+  <node pkg="nodelet" type="nodelet" name="CameraNodelet" args="load camera_aravis/CameraNodelet standalone_nodelet" output="screen">
+    <param name="AcquisitionFrameRate" value="10.0"/>
+    <param name="Binning" value="Half"/>
+  </node>
+
+  <node pkg="image_view" type="image_view" name="test_view">
+    <remap from="image" to="CameraNodelet/image" />
+  </node>
+</launch>
