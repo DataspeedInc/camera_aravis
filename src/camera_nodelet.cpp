@@ -1015,9 +1015,12 @@ void CameraNodelet::onInitImpl()
   // WriteCameraFeaturesFromRosparam(nh);
 
   // Get parameter current values.
-  xRoi=0; yRoi=0; widthRoi=0; heightRoi=0;
+  xRoi=0; yRoi=0; widthRoi=widthRoiMax; heightRoi=heightRoiMax;
   dx=1; dy=1;
   arv_camera_get_binning(pCamera, &dx, &dy);
+
+  arv_device_set_integer_feature_value (pDevice, "GevSCPSPacketSize", 1500);
+  arv_camera_set_region(pCamera, xRoi, yRoi, widthRoi, heightRoi);
   arv_camera_get_region(pCamera, &xRoi, &yRoi, &widthRoi, &heightRoi);
   config.ExposureTimeAbs     = isImplementedExposureTimeAbs ? arv_device_get_float_feature_value(pDevice, "ExposureTimeAbs") : 0;
   config.Gain              = isImplementedGain ? arv_camera_get_gain(pCamera) : 0.0;
