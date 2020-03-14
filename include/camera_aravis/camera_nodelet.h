@@ -131,7 +131,7 @@ class CameraNodelet : public nodelet::Nodelet
 
   virtual void onInit();
 
-  void onInitImpl();
+  void onInitImpl(ros::NodeHandle& nh, ros::NodeHandle& nhp);
 
 private:
   ApplicationData                         applicationData;

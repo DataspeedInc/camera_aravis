@@ -1,13 +1,17 @@
+<?xml version="1.0"?>
 <launch>
+  <arg name="name"          default="camera" />
   <arg name="frame_rate_hz" default="10" />
+  <arg name="debug_view"    default="false"  doc="Launch an image viewer" />
 
-  <node pkg="nodelet" type="nodelet" name="standalone_nodelet"  args="manager" output="screen"/>
-  
-  <node pkg="nodelet" type="nodelet" name="camera" args="load camera_aravis/CameraNodelet standalone_nodelet" output="screen">
-    <param name="AcquisitionFrameRate" value="10.0"/>
-  </node>
+  <group ns="$(arg name)">
+    <node pkg="nodelet" type="nodelet" name="nodelet_manager"  args="manager" output="screen"/>
+    <node pkg="nodelet" type="nodelet" name="driver_nodelet"   args="load camera_aravis/CameraNodelet nodelet_manager" output="screen">
+      <param name="AcquisitionFrameRate" value="10.0"/>
+    </node>
+  </group>
 
-  <node pkg="image_view" type="image_view" name="test_view">
+  <node pkg="image_view" type="image_view" name="test_view" if="$(arg debug_view)">
     <remap from="image" to="camera/image" />
   </node>
 </launch>

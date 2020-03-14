@@ -3,7 +3,7 @@
   
   <node pkg="nodelet" type="nodelet" name="CameraNodelet" args="load camera_aravis/CameraNodelet standalone_nodelet" output="screen">
     <param name="AcquisitionFrameRate" value="10.0"/>
-    <param name="ROI" value="0, 0, 1280, 960"/>
+    <param name="ROI" value="0,0,1280,650"/>
   </node>
 
   <node pkg="image_view" type="image_view" name="test_view">
