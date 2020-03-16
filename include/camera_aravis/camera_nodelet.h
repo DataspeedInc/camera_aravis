@@ -174,6 +174,7 @@ private:
   int                                     dx, dy;
   int                                     dxMin, dxMax;
   int                                     dyMin, dyMax;
+  int                                     mod_count;
 
   const char                             *pszPixelformat;
   unsigned                                nBytesPixel;

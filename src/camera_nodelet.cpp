@@ -393,21 +393,11 @@ void CameraNodelet::NewBuffer_callback (ArvStream *pStream, gpointer* data)
     {
         if (arv_buffer_get_status (pBuffer) == ARV_BUFFER_STATUS_SUCCESS)
         {
-            sensor_msgs::Image msg;
-
-            size_t buffer_size;
-            char *buffer_data = (char *) arv_buffer_get_data (pBuffer, &buffer_size);
-
-            This->applicationData.nBuffers++;
-            std::vector<uint8_t> this_data(buffer_size);
-            memcpy(&this_data[0], buffer_data, buffer_size);
-
-
             // Camera/ROS Timestamp coordination.
             cn				= (uint64_t)arv_buffer_get_timestamp (pBuffer);	// Camera now
             rn	 			= ros::Time::now().toNSec();					// ROS now
 
-            if (iFrame < 10)
+            if (iFrame++ < 10)
             {
                 cm = cn;
                 tm  = rn;
@@ -435,6 +425,25 @@ void CameraNodelet::NewBuffer_callback (ArvStream *pStream, gpointer* data)
             tm = tn;
             em = en;
 
+            // Handle mod_rate publishing
+            // HACK: this fixes problems with exposure configuration
+            // TODO: figure out how to properly configure auto exposure
+            This->mod_count = (This->mod_count + 1) % This->config.mod_rate;
+            bool publish_this_frame = This->mod_count == 0;
+            if (!publish_this_frame) {
+                arv_stream_push_buffer (pStream, pBuffer);
+                return;
+            }
+
+            sensor_msgs::Image msg;
+
+            size_t buffer_size;
+            char *buffer_data = (char *) arv_buffer_get_data (pBuffer, &buffer_size);
+
+            This->applicationData.nBuffers++;
+            std::vector<uint8_t> this_data(buffer_size);
+            memcpy(&this_data[0], buffer_data, buffer_size);
+
             // Construct the image message.
             msg.header.stamp.fromNSec(tn);
             msg.header.seq = arv_buffer_get_frame_id (pBuffer);
@@ -460,7 +469,6 @@ void CameraNodelet::NewBuffer_callback (ArvStream *pStream, gpointer* data)
             ROS_WARN_THROTTLE (5, "Frame error: %s", szBufferStatusFromInt[arv_buffer_get_status (pBuffer)]);
 
         arv_stream_push_buffer (pStream, pBuffer);
-        iFrame++;
     }
 } // NewBuffer_callback()
 
@@ -798,6 +806,7 @@ void CameraNodelet::onInitImpl(ros::NodeHandle& nh, ros::NodeHandle& nhp)
   applicationData.nBuffers = 0;
   applicationData.main_loop = NULL;
   bCancel = false;
+  mod_count = 0;
 
   // TODO: support parameters, not just dynamic reconfigure
   config = config.__getDefault__();
