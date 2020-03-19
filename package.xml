@@ -1,4 +1,5 @@
-<package>
+<?xml version="1.0"?>
+<package format="2">
   <name>camera_aravis</name>
   <version>2.0.0</version>
   <description>camera_aravis: An ethernet camera driver for ROS.</description>
@@ -8,36 +9,28 @@
   <author email="stevesafarik@gmail.com">Steve Safarik</author>
   <author email="andrew.straw@imp.ac.at">Andrew Straw</author>
   <author email="j.corbett@sssmanufacturing.com">Jeremy Corbett</author>
+  <author email="llorenz@dataspeedinc.com">Lincoln Lorenz</author>
 
   <license>LGPLv2</license>
 
-  <url type="website">http://github.com/ssafarik/camera_aravis</url>
+  <url type="website">http://github.com/linknum23/camera_aravis</url>
 
   <author>strawlab</author>
   <author>Steve Safarik</author>
   <author>Jeremy Corbett</author>
+  <author>Lincoln Lorenz</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>roscpp</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>image_transport</build_depend>
-  <build_depend>camera_info_manager</build_depend>
-  <build_depend>dynamic_reconfigure</build_depend>
-  <build_depend>nodelet</build_depend>
-  <build_depend>nodelet_topic_tools</build_depend>
-  <build_depend>tf</build_depend>
-  <build_depend>aravis</build_depend>
-
-  <run_depend>roscpp</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>image_transport</run_depend>
-  <run_depend>camera_info_manager</run_depend>
-  <run_depend>dynamic_reconfigure</run_depend>
-  <run_depend>nodelet</run_depend>
-  <run_depend>nodelet_topic_tools</run_depend>
-  <run_depend>tf</run_depend>
-  <run_depend>aravis</run_depend>
+  <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>image_transport</depend>
+  <depend>camera_info_manager</depend>
+  <depend>dynamic_reconfigure</depend>
+  <depend>nodelet</depend>
+  <depend>nodelet_topic_tools</depend>
+  <depend>tf</depend>
+  <depend>aravis</depend>
 
   <export>
     <nodelet plugin="${prefix}/camera_aravis_plugins.xml" />

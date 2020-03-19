@@ -1,17 +1,19 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="name"          default="camera" />
-  <arg name="frame_rate_hz" default="10" />
-  <arg name="debug_view"    default="false"  doc="Launch an image viewer" />
+  <arg name="camera_ns"     default="camera"  doc="camera namespace" />
+  <arg name="frame_rate_hz" default="10"      deoc="frame rate" />
+  <arg name="mod_rate"      defaul="1"        doc="only publish every xth frame, workaround for autoexposure bug"/>
+  <arg name="debug_view"    default="false"   doc="launch an image viewer" />
 
-  <group ns="$(arg name)">
+  <group ns="$(arg camera_ns)">
     <node pkg="nodelet" type="nodelet" name="nodelet_manager"  args="manager" output="screen"/>
     <node pkg="nodelet" type="nodelet" name="driver_nodelet"   args="load camera_aravis/CameraNodelet nodelet_manager" output="screen">
-      <param name="AcquisitionFrameRate" value="10.0"/>
+      <param name="AcquisitionFrameRate" value="$(arg frame_rate_hz)" />
+      <param name="mod_rate"             value="$(arg mod_rate)" />
     </node>
   </group>
 
   <node pkg="image_view" type="image_view" name="test_view" if="$(arg debug_view)">
-    <remap from="image" to="camera/image" />
+    <remap from="image" to="$(arg camera_ns)/image" />
   </node>
 </launch>
