@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
   <arg name="camera_ns"     default="camera"         doc="camera namespace" />
-  <arg name="frame_rate_hz" default="10"             deoc="frame rate" />
-  <arg name="mod_rate"      defaul="1"               doc="only publish every xth frame, workaround for autoexposure bug"/>
+  <arg name="frame_rate_hz" default="10"             doc="frame rate" />
+  <arg name="mod_rate"      default="1"              doc="only publish every xth frame, workaround for autoexposure bug"/>
   <arg name="debug_view"    default="false"          doc="launch an image viewer" />
   <arg name="frame_id"      default="camera_optical" doc="tf frame id for camera" />
 
