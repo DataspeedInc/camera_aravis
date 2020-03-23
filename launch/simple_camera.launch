@@ -1,10 +1,12 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="camera_ns"     default="camera"         doc="camera namespace" />
-  <arg name="frame_rate_hz" default="10"             doc="frame rate" />
-  <arg name="mod_rate"      default="1"              doc="only publish every xth frame, workaround for autoexposure bug"/>
-  <arg name="debug_view"    default="false"          doc="launch an image viewer" />
-  <arg name="frame_id"      default="camera_optical" doc="tf frame id for camera" />
+  <arg name="camera_ns"        default="camera"         doc="camera namespace" />
+  <arg name="frame_rate_hz"    default="10"             doc="frame rate" />
+  <arg name="mod_rate"         default="1"              doc="only publish every xth frame, workaround for autoexposure bug"/>
+  <arg name="debug_view"       default="false"          doc="launch an image viewer" />
+  <arg name="frame_id"         default="camera_optical" doc="tf frame id for camera" />
+  <arg name="camera_info_url"  default=""               doc="Camera info url ie. file:///full/path/to/local/camera_cal.yaml or package://camera_info_manager/tests/test_calibration.yaml, empty dedaults to ~/.ros/camera_info/CAMERA_SERIAL_NUM.yaml" />
+  <arg name="rectify"          default="false"          doc="rectify the camera's image?" />
 
   <group ns="$(arg camera_ns)">
     <node pkg="nodelet" type="nodelet" name="nodelet_manager"  args="manager" output="screen"/>
@@ -12,6 +14,14 @@
       <param name="AcquisitionFrameRate" value="$(arg frame_rate_hz)" />
       <param name="mod_rate"             value="$(arg mod_rate)" />
       <param name="frame_id"             value="$(arg frame_id)" />
+      <param name="camera_info_url"      value="$(arg camera_info_url)" />
+      <remap from="image"  to="image_raw" />
+    </node>
+    <!-- Apply lens rectification -->
+    <!-- TODO: rectification creates a greyscale image for some weird reason, should we try different image formats or something? -->
+    <node if="$(arg rectify)" pkg="nodelet" type="nodelet" name="rectify_color" args="load image_proc/rectify nodelet_manager" >
+      <remap from="image_mono" to="image_raw" />
+      <remap from="image_rect" to="image_rect_color" />
     </node>
   </group>
 

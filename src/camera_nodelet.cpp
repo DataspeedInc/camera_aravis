@@ -964,6 +964,7 @@ void CameraNodelet::onInitImpl(ros::NodeHandle& nh, ros::NodeHandle& nhp)
   nhp.getParam("Gain", config.Gain);
   nhp.getParam("AcquisitionFrameRate", config.AcquisitionFrameRate);
   nhp.getParam("Binning", config.Binning);
+  nhp.param<std::string>("camera_info_url", camera_info_url_, "");
   reconfigureServer.updateConfig(config); // sync up with dynamic reconfig so everyone has the same config
   if (isImplementedExposureTimeAbs)
     arv_device_set_float_feature_value(pDevice, "ExposureTimeAbs", config.ExposureTimeAbs);
@@ -1102,7 +1103,7 @@ void CameraNodelet::onInitImpl(ros::NodeHandle& nh, ros::NodeHandle& nhp)
   ROS_DEBUG("    ----------------------------------------------------------------------------------");
 
   // Start the camerainfo manager.
-  pCameraInfoManager = new camera_info_manager::CameraInfoManager(nh, arv_device_get_string_feature_value(pDevice, "DeviceID"));
+  pCameraInfoManager = new camera_info_manager::CameraInfoManager(nh, arv_device_get_string_feature_value(pDevice, "DeviceID"), camera_info_url_);
 
   // TODO: some camera config changed from when parameters were set, should we sync up the config with the current camera settings? or just keep them at what was requested?
   reconfigureServer.updateConfig(config);

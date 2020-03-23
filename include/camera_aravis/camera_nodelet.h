@@ -183,6 +183,7 @@ private:
   int                                     mtu;
   int                                     Acquire;
   const char                             *keyAcquisitionFrameRate;
+  std::string                             camera_info_url_;
 
 };
 }
