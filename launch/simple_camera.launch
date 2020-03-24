@@ -1,26 +1,43 @@
 <?xml version="1.0"?>
 <launch>
+  <arg name="playback_enabled" default="false"          doc="if images are being played back from recording" />
   <arg name="camera_ns"        default="camera"         doc="camera namespace" />
   <arg name="frame_rate_hz"    default="10"             doc="frame rate" />
   <arg name="mod_rate"         default="1"              doc="only publish every xth frame, workaround for autoexposure bug"/>
   <arg name="debug_view"       default="false"          doc="launch an image viewer" />
   <arg name="frame_id"         default="camera_optical" doc="tf frame id for camera" />
   <arg name="camera_info_url"  default=""               doc="Camera info url ie. file:///full/path/to/local/camera_cal.yaml or package://camera_info_manager/tests/test_calibration.yaml, empty dedaults to ~/.ros/camera_info/CAMERA_SERIAL_NUM.yaml" />
-  <arg name="rectify"          default="false"          doc="rectify the camera's image?" />
+  <arg name="device_id"        default=""               doc="Camera id, likely it's serial number" />
 
   <group ns="$(arg camera_ns)">
-    <node pkg="nodelet" type="nodelet" name="nodelet_manager"  args="manager" output="screen"/>
-    <node pkg="nodelet" type="nodelet" name="driver_nodelet"   args="load camera_aravis/CameraNodelet nodelet_manager" output="screen">
+    <!-- Manage all of the nodelets in the image pipeline -->
+    <arg name="manager" value="nodelet_manager" />
+    <node pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" output="screen"/>
+    <!-- Acquire images (if needed) -->
+    <node unless="$(arg playback_enabled)" pkg="nodelet" type="nodelet" name="driver_nodelet"
+          args="load camera_aravis/CameraNodelet $(arg manager)" output="screen">
       <param name="AcquisitionFrameRate" value="$(arg frame_rate_hz)" />
+      <param name="guid"                 value="$(arg device_id)" />
       <param name="mod_rate"             value="$(arg mod_rate)" />
       <param name="frame_id"             value="$(arg frame_id)" />
       <param name="camera_info_url"      value="$(arg camera_info_url)" />
-      <remap from="image"  to="image_raw" />
+      <remap from="image" to="image_raw" />
     </node>
-    <!-- Apply lens rectification -->
-    <!-- TODO: rectification creates a greyscale image for some weird reason, should we try different image formats or something? -->
-    <node if="$(arg rectify)" pkg="nodelet" type="nodelet" name="rectify_color" args="load image_proc/rectify nodelet_manager" >
-      <remap from="image_mono" to="image_raw" />
+    <!-- Uncompress recorded topics (if needed) -->
+    <!-- TODO: Do we need to uncompress?
+    <node if="$(arg playback_enabled)" pkg="image_transport" type="republish" name="decompressor" output="screen"
+          args="compressed raw">
+      <remap from="in" to="image_raw" />
+      <remap from="out" to="uncompressed/image_raw" />
+    </node>
+    -->
+    <!-- Debayer and publish monochrome and color topics -->
+    <node pkg="nodelet" type="nodelet" name="debayer"       args="load image_proc/debayer $(arg manager)"/>
+    <!-- Rectify monochrome images -->
+    <node pkg="nodelet" type="nodelet" name="rectify_mono"  args="load image_proc/rectify $(arg manager)"/>
+    <!-- Rectify color images -->
+    <node pkg="nodelet" type="nodelet" name="rectify_color" args="load image_proc/rectify $(arg manager)" >
+      <remap from="image_mono" to="image_color" />
       <remap from="image_rect" to="image_rect_color" />
     </node>
   </group>
