@@ -24,13 +24,8 @@
       <remap from="image" to="image_raw" />
     </node>
     <!-- Uncompress recorded topics (if needed) -->
-    <!-- TODO: Do we need to uncompress?
     <node if="$(arg playback_enabled)" pkg="image_transport" type="republish" name="decompressor" output="screen"
-          args="compressed raw">
-      <remap from="in" to="image_raw" />
-      <remap from="out" to="uncompressed/image_raw" />
-    </node>
-    -->
+          args="compressed in:=image_raw raw out:=image_raw" />
     <!-- Debayer and publish monochrome and color topics -->
     <node pkg="nodelet" type="nodelet" name="debayer"       args="load image_proc/debayer $(arg manager)"/>
     <!-- Rectify monochrome images -->
