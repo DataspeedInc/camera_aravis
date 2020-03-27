@@ -9,6 +9,13 @@
   <arg name="camera_info_url"  default=""               doc="Camera info url ie. file:///full/path/to/local/camera_cal.yaml or package://camera_info_manager/tests/test_calibration.yaml, empty dedaults to ~/.ros/camera_info/CAMERA_SERIAL_NUM.yaml" />
   <arg name="device_id"        default=""               doc="Camera id, likely it's serial number" />
 
+  <!-- ROI handling -->
+  <arg name="use_roi"  default="false" doc="Perform ROI cropping in the camera_ns/roi namespave" />
+  <arg name="x_offset" default="0"     doc="X offset of the region of interest. Range: 0 to 2447" />
+  <arg name="y_offset" default="0"     doc="Y offset of the region of interest. Range: 0 to 2049" />
+  <arg name="width"    default="0"     doc="Width of the region of interest. Range: 0 to 2448" />
+  <arg name="height"   default="0"     doc="Height of the region of interest. Range: 0 to 2050" />
+
   <group ns="$(arg camera_ns)">
     <!-- Manage all of the nodelets in the image pipeline -->
     <arg name="manager" value="nodelet_manager" />
@@ -35,9 +42,33 @@
       <remap from="image_mono" to="image_color" />
       <remap from="image_rect" to="image_rect_color" />
     </node>
+    <!-- Handle ROIs in a seperate roi namespace -->
+    <group ns="roi" if="$(arg use_roi)">
+      <node pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" output="screen"/>
+      <!-- Debayer and publish monochrome and color topics -->
+      <node pkg="nodelet" type="nodelet" name="debayer"       args="load image_proc/debayer $(arg manager)"/>
+      <!-- Rectify monochrome images -->
+      <node pkg="nodelet" type="nodelet" name="rectify_mono"  args="load image_proc/rectify $(arg manager)"/>
+      <!-- Rectify color images -->
+      <node pkg="nodelet" type="nodelet" name="rectify_color" args="load image_proc/rectify $(arg manager)" >
+        <remap from="image_mono" to="image_color" />
+        <remap from="image_rect" to="image_rect_color" />
+      </node>
+    </group>
   </group>
-
+  <!-- Handle ROIs in a seperate roi namespace -->
+  <!-- This needs to be handled outside the namespace so that camera can be remapped -->
+  <node if="$(arg use_roi)" pkg="nodelet" type="nodelet" name="crop" output="screen"
+        args="load image_proc/crop_decimate $(arg camera_ns)/roi/nodelet_manager">
+    <remap from="camera"     to="$(arg camera_ns)" />
+    <remap from="camera_out" to="$(arg camera_ns)/roi" />
+    <param name="x_offset"   value="$(arg x_offset)" />
+    <param name="y_offset"   value="$(arg y_offset)" />
+    <param name="width"      value="$(arg width)" />
+    <param name="height"     value="$(arg height)" />
+  </node>
   <node pkg="image_view" type="image_view" name="test_view" if="$(arg debug_view)">
-    <remap from="image" to="$(arg camera_ns)/image" />
+    <remap from="image" to="$(arg camera_ns)/image_rect_color"     unless="$(arg use_roi" />
+    <remap from="image" to="$(arg camera_ns)/roi/image_rect_color" if="$(arg use_roi" />
   </node>
 </launch>
